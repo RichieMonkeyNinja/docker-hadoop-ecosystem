@@ -1,0 +1,130 @@
+version: "3"
+
+services:
+  namenode:
+    image: bde2020/hadoop-namenode:2.0.0-hadoop3.2.1-java8
+    container_name: namenode
+    environment:
+      - CLUSTER_NAME=test
+    env_file:
+      - ./hadoop.env
+    ports:
+      - "9870:9870"
+      - "9000:9000"
+    volumes:
+      - namenode-data:/hadoop/dfs/name
+
+  datanode:
+    image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
+    container_name: datanode
+    env_file:
+      - ./hadoop.env
+    ports:
+      - "9864:9864"
+    volumes:
+      - datanode-data:/hadoop/dfs/data
+
+  resourcemanager:
+    image: bde2020/hadoop-resourcemanager:2.0.0-hadoop3.2.1-java8
+    container_name: resourcemanager
+    env_file:
+      - ./hadoop.env
+    ports:
+      - "8088:8088"
+
+  nodemanager:
+    image: bde2020/hadoop-nodemanager:2.0.0-hadoop3.2.1-java8
+    container_name: nodemanager
+    env_file:
+      - ./hadoop.env
+
+  historyserver:
+    image: bde2020/hadoop-historyserver:2.0.0-hadoop3.2.1-java8
+    container_name: historyserver
+    env_file:
+      - ./hadoop.env
+    ports:
+      - "19888:19888"
+  postgres:
+    image: postgres:11
+    container_name: hive-postgres
+    environment:
+      POSTGRES_DB: metastore
+      POSTGRES_USER: hive
+      POSTGRES_PASSWORD: hive
+    volumes:
+      - hive-postgres-data:/var/lib/postgresql/data
+
+  hive-server:
+    image: bde2020/hive:2.3.2-postgresql-metastore
+    container_name: hive-server
+    env_file:
+      - ./hadoop.env
+    environment:
+      HIVE_CORE_CONF_javax_jdo_option_ConnectionURL: jdbc:postgresql://hive-postgres:5432/metastore
+      HIVE_CORE_CONF_javax_jdo_option_ConnectionDriverName: org.postgresql.Driver
+      HIVE_CORE_CONF_javax_jdo_option_ConnectionUserName: hive
+      HIVE_CORE_CONF_javax_jdo_option_ConnectionPassword: hive
+      HIVE_SITE_CONF_hive_metastore_uris: thrift://hive-metastore:9083
+      HIVE_SITE_CONF_hive_metastore_warehouse_dir: /user/hive/warehouse
+    depends_on:
+      - namenode
+      - datanode
+      - postgres
+    ports:
+      - "10000:10000"
+
+  hive-metastore:
+    image: bde2020/hive:2.3.2-postgresql-metastore
+    container_name: hive-metastore
+    env_file:
+      - ./hadoop.env
+    environment:
+      HIVE_CORE_CONF_javax_jdo_option_ConnectionURL: jdbc:postgresql://hive-postgres:5432/metastore
+      HIVE_CORE_CONF_javax_jdo_option_ConnectionDriverName: org.postgresql.Driver
+      HIVE_CORE_CONF_javax_jdo_option_ConnectionUserName: hive
+      HIVE_CORE_CONF_javax_jdo_option_ConnectionPassword: hive
+      HIVE_SITE_CONF_hive_metastore_warehouse_dir: /user/hive/warehouse
+    command: /opt/hive/bin/hive --service metastore
+    depends_on:
+      - postgres
+      - namenode
+      - datanode
+    ports:
+      - "9083:9083"      
+  spark-notebook:
+    image: jupyter/pyspark-notebook:spark-3.5.0
+    container_name: spark-notebook
+    depends_on:
+      - namenode
+      - datanode
+      - hive-metastore
+    ports:
+      - "8888:8888"
+    environment:
+      - HADOOP_CONF_DIR=/opt/hadoop-3.2.1/etc/hadoop
+    volumes:
+      - ./notebooks:/home/jovyan/work
+      - ./hadoop-conf:/opt/hadoop-3.2.1/etc/hadoop
+      - ./hadoop-conf/hive-site.xml:/opt/spark/conf/hive-site.xml
+      - ./spark-jars:/opt/jdbc-jars
+  analytics-postgres:
+    image: postgres:14
+    container_name: analytics-postgres
+    environment:
+      POSTGRES_DB: analytics
+      POSTGRES_USER: analytics
+      POSTGRES_PASSWORD: analytics
+    ports:
+      - "5433:5432"   # expose to Power BI
+    volumes:
+      - analytics-postgres-data:/var/lib/postgresql/data
+
+    
+
+
+volumes:
+  namenode-data:
+  datanode-data:
+  hive-postgres-data:
+  analytics-postgres-data:
