@@ -108,17 +108,25 @@ services:
       - ./hadoop-conf:/opt/hadoop-3.2.1/etc/hadoop
       - ./hadoop-conf/hive-site.xml:/opt/spark/conf/hive-site.xml
       - ./spark-jars:/opt/jdbc-jars
-  analytics-postgres:
-    image: postgres:14
-    container_name: analytics-postgres
-    environment:
-      POSTGRES_DB: analytics
-      POSTGRES_USER: analytics
-      POSTGRES_PASSWORD: analytics
+  analytics-clickhouse:
+    image: clickhouse/clickhouse-server:24.8
+    container_name: analytics-clickhouse
     ports:
-      - "5433:5432"   # expose to Power BI
+      - "8123:8123"   # expose to Power BI
+      - "9000:9000"
+    ulimits:
+      nofile:
+        soft: 262144 
+        hard: 262144
     volumes:
-      - analytics-postgres-data:/var/lib/postgresql/data
+      - clickhouse-data
+      - ./clickhouse-config/users.xml:/etc/clickhouse-server/users.d/users.xml
+    healthcheck:
+      test: ["CMD", "wget","--spider","-q","localhost:8123/ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      # start_period: 30s
 
     
 
@@ -127,4 +135,4 @@ volumes:
   namenode-data:
   datanode-data:
   hive-postgres-data:
-  analytics-postgres-data:
+  clickhouse-data:
