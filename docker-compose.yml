@@ -113,13 +113,13 @@ services:
     container_name: analytics-clickhouse
     ports:
       - "8123:8123"   # expose to Power BI
-      - "9000:9000"
+      - "9001:9000"
     ulimits:
       nofile:
         soft: 262144 
         hard: 262144
     volumes:
-      - clickhouse-data
+      - clickhouse-data:/var/lib/clickhouse
       - ./clickhouse-config/users.xml:/etc/clickhouse-server/users.d/users.xml
     healthcheck:
       test: ["CMD", "wget","--spider","-q","localhost:8123/ping"]
