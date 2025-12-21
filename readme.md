@@ -17,10 +17,10 @@
 2) You should see something like this, randomly generated 48 tokens behind the localhost URL for access purposes. Copy-paste the URL into your favorite browser to start exploring Spark!
 
 (Note: Copy the http://127.0.0.1:8888/lab? version, as it is the most consistent for my windows OS)
-![alt text](image.png)
+![alt text](readme_images/image.png)
 
 3) You should see this webpage once loaded.
-![alt text](image-1.png)
+![alt text](readme_images/image-1.png)
 
 - The mounted folder is inside ./work/, please save your work that is ready to push inside  the ./work/ folder.
 
@@ -72,9 +72,9 @@ df.write.jdbc(
 
 1) If Windows OS, can directly download dbeaver from Microsoft Store. Else, can install dbeaver Community Edition directly from webpages. Else, god bless you.
 
-2) ![alt text](image-2.png)
+2) ![alt text](readme_images/image-2.png)
 
-3) ![alt text](image-3.png)
+3) ![alt text](readme_images/image-3.png)
 
 
 
