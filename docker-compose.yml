@@ -101,13 +101,26 @@ services:
       - hive-metastore
     ports:
       - "8888:8888"
+      - "4040:4040"
+      - "4045:4045"
     environment:
+      - HADOOP_USER_NAME=root
       - HADOOP_CONF_DIR=/opt/hadoop-3.2.1/etc/hadoop
+      - SPARK_DRIVER_HOST=spark-notebook
+      - SPARK_DRIVER_BIND_ADDRESS=0.0.0.0
+      - SPARK_DRIVER_EXTRA_CLASSPATH=/opt/jdbc-jars/clickhouse-jdbc-0.9.5-all.jar
+      - SPARK_EXECUTOR_EXTRA_CLASSPATH=/opt/jdbc-jars/clickhouse-jdbc-0.9.5-all.jar
+      - SPARK_DRIVER_MEMORY=1g
+      - SPARK_EXECUTOR_MEMORY=1g
+      - SPARK_BLOCKMANAGER_PORT=4045
+      - CHOWN_HOME=yes
     volumes:
       - ./notebooks:/home/jovyan/work
       - ./hadoop-conf:/opt/hadoop-3.2.1/etc/hadoop
       - ./hadoop-conf/hive-site.xml:/opt/spark/conf/hive-site.xml
       - ./spark-jars:/opt/jdbc-jars
+      - ./spark-defaults.conf:/usr/local/spark/conf/spark-defaults.conf
+    user: root
   analytics-clickhouse:
     image: clickhouse/clickhouse-server:24.8
     container_name: analytics-clickhouse
@@ -121,6 +134,7 @@ services:
     volumes:
       - clickhouse-data:/var/lib/clickhouse
       - ./clickhouse-config/users.xml:/etc/clickhouse-server/users.d/users.xml
+      - ./scripts/setup.sql:/docker-entrypoint-initdb.d/setup.sql
     healthcheck:
       test: ["CMD", "wget","--spider","-q","localhost:8123/ping"]
       interval: 10s
