@@ -83,13 +83,14 @@ df.write.jdbc(
 1) Storage - HDFS (OK)
 2) Processing - pySpark notebook (OK)
 3) Exploration + Metadata - Hive SQL + Hive Metastore (running on postgreSQL) (OK)
-4) OLAP DB - pySpark writes data on Analytics DB (separate postgreSQL) (on-going)
+4) OLAP DB - pySpark writes data on Analytics OLAP DB (Apache ClickHouse) (OK)
+5) Power BI Template - (On-going)
 
 # Future Features (Considerations)
 ## Feel free to submit your ideas!
 ### Most of the technologies I selected are based off the popular tech frameworks on Job Sites (LinkedIn, Indeed, etc)
 
 1) Orchestrator - Apache Airflow
-2) OLAP DB - ClickHouse
+2) ~~OLAP DB - ClickHouse~~
 3) (Low Priority) - Cloud, Beeline, Apache Beam (similar to GCP Dataflow)
 4) (Low Priority) - Unstructured Data - HBase, MongoDB
