@@ -76,7 +76,33 @@ df.write.jdbc(
 
 3) ![alt text](readme_images/image-3.png)
 
+# How to use Power BI to connect with Clickhouse
 
+1) Install Power BI from Microsoft Store (Windows OS), else God Bless you.
+2) Install ClickHouse ODBC Driver from this site: https://github.com/ClickHouse/clickhouse-odbc/releases
+3) Personally, I (Richie) installed 1.5.0.20251127 as the later versions are BETA as of 21/12/2025.
+
+![alt text](image.png)
+
+4) Now, you can connect to ClickHouse via Power BI similar to any other databases! 
+
+Continue reading below if first-time or new to Power BI:
+
+5) In the top navigation bar, click **Transform Data** to enter **Power Query Editor** (backend of Power BI to extract data).
+
+![alt text](image-1.png)
+
+6) Select **New Source** -> **More** -> **ClickHouse**
+![alt text](image-2.png)
+
+7) Host: localhost, Port: 8123, Database: default, Username: spark_admin, Password: spark_123
+![alt text](image-3.png)
+
+8) Yipee, you connected successfully (hopefully) with ClickHouse ODBC Driver!
+
+9) As of 21/12/2025, this is the snapshot of the UM x Airbnb Power BI template design, feel free to pitch your ideas.
+
+![alt text](image-4.png)
 
 # Progress Update (Skeletal Framework)
 
@@ -84,7 +110,7 @@ df.write.jdbc(
 2) Processing - pySpark notebook (OK)
 3) Exploration + Metadata - Hive SQL + Hive Metastore (running on postgreSQL) (OK)
 4) OLAP DB - pySpark writes data on Analytics OLAP DB (Apache ClickHouse) (OK)
-5) Power BI Template - (On-going)
+5) Power BI Template - (OK)
 
 # Future Features (Considerations)
 ## Feel free to submit your ideas!
