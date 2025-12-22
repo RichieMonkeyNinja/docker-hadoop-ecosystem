@@ -7,6 +7,34 @@
 5) Please please notify me any encountered issues.
 6) Please create a new branch for any new features, please don't commit directly on the main branch, submit a merge request and notify Richie Teoh or Elmer Lee to validate the branch and approve the merge request.
 
+# How to Use venv with uv
+
+uv is a tool written in Rust (that's how you know it's fast) as an all-in-one cargo for Python, think of it as replacement for these:
+
+- pip, venv, pyenv, pipx, Poetry
+
+1) Install venv
+```powershell
+powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+```
+
+2) Run the following Powershell commands:
+```powershell
+uv sync
+```
+
+3) Two ways to run your scripts:
+- Modern way: 
+```powershell 
+uv run script.py
+```
+
+- Classic way:
+```powershell
+.venv\Scripts\activate
+python script.py
+```
+
 # How to Use Spark-Notebook
 
 1) 
@@ -111,6 +139,10 @@ Continue reading below if first-time or new to Power BI:
 3) Exploration + Metadata - Hive SQL + Hive Metastore (running on postgreSQL) (OK)
 4) OLAP DB - pySpark writes data on Analytics OLAP DB (Apache ClickHouse) (OK)
 5) Power BI Template - (OK)
+
+# On-going Tasks
+
+1) High Priority: Manually extract the data and upload inside HDFS
 
 # Future Features (Considerations)
 ## Feel free to submit your ideas!
