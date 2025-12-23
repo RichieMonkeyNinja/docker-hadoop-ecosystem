@@ -7,6 +7,18 @@
 5) Please please notify me any encountered issues.
 6) Please create a new branch for any new features, please don't commit directly on the main branch, submit a merge request and notify Richie Teoh or Elmer Lee to validate the branch and approve the merge request.
 
+# Project Overview
+
+This project will use the Medallion architecture:
+1) Bronze Layer - to ingest and keep raw data
+2) Silver Layer - to clean and deduplicate bronze data
+3) Gold Layer - to join//add colummns to cleaned silver data
+
+Refer to individual \<stage>.md inside tutorial_md to follow step-by-step on executing the project.
+
+Thank you for reading! Continue to read below if you want to understand the tools.
+ 
+
 # How to Use venv with uv
 
 uv is a tool written in Rust (that's how you know it's fast) as an all-in-one cargo for Python, think of it as replacement for these:
