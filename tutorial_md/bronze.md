@@ -34,6 +34,8 @@ Note: In a medallion architecture following an ELT format, data are ingested and
 1. Open the Spark Notebook. 
 - Refer to readme.md under **How to Use Spark-Notebook** for guides on how to access Spark Notebook.
 
+**Method A (Outdated):**
+
 2. Run the following .ipynb files:
 - /work/bronze/upload_hdfs.ipynb
 
@@ -50,3 +52,13 @@ Note: In a medallion architecture following an ELT format, data are ingested and
 ![alt text](bronze_md_upload_hdfs_ss3.png)
 
 ![alt text](bronze_md_upload_hdfs_ss4.png)
+
+**Method B (Airflow):**
+
+2. Access http://localhost:8081/home 
+- Login Credentials (Username // Password): admin // admin
+
+3. Run DAG -  bronze_airbnb_spark_ingestion
+
+![alt text](bronze_md_airflow.png)
+
