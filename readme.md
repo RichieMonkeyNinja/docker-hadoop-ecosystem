@@ -77,15 +77,15 @@ python script.py
 1. Access http://localhost:8081/home 
 2. Login Credentials (Username // Password): admin // admin
 
-![alt text](image.png)
+![alt text](readme_images/image-10.png)
 
 3. 
 
-![alt text](image-1.png)
+![alt text](readme_images/image-11.png)
 
 4. Click Inside "bronze_airbnb_spark_ingestion"
 
-![alt text](image-2.png)
+![alt text](readme_images/image-12.png)
 
 
 
@@ -160,6 +160,14 @@ Continue reading below if first-time or new to Power BI:
 9) As of 21/12/2025, this is the snapshot of the UM x Airbnb Power BI template design, feel free to pitch your ideas.
 
 ![alt text](readme_images/image-9.png)
+
+10) As of 27/12/2025, snapshot of Power BI design, feel free to pitch your ideas.
+
+![alt text](image.png)
+
+![alt text](image-1.png)
+
+![alt text](image-2.png)
 
 # Progress Update (Skeletal Framework)
 
