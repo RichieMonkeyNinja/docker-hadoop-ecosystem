@@ -72,6 +72,21 @@ python script.py
 
 5) PySpark Resources//Documentation: https://spark.apache.org/docs/latest/api/python/user_guide/index.html
 
+# How to Use Apache Airflow
+
+1. Access http://localhost:8081/home 
+2. Login Credentials (Username // Password): admin // admin
+
+![alt text](image.png)
+
+3. 
+
+![alt text](image-1.png)
+
+4. Click Inside "bronze_airbnb_spark_ingestion"
+
+![alt text](image-2.png)
+
 
 
 # How to Create a New Branch - Git & GitHub
