@@ -13,6 +13,8 @@ services:
       - "9000:9000"
     volumes:
       - namenode-data:/hadoop/dfs/name
+    networks:
+      - monkey-network      
 
   datanode:
     image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
@@ -23,6 +25,8 @@ services:
       - "9864:9864"
     volumes:
       - datanode-data:/hadoop/dfs/data
+    networks:
+      - monkey-network      
 
   resourcemanager:
     image: bde2020/hadoop-resourcemanager:2.0.0-hadoop3.2.1-java8
@@ -31,12 +35,16 @@ services:
       - ./hadoop.env
     ports:
       - "8088:8088"
+    networks:
+      - monkey-network      
 
   nodemanager:
     image: bde2020/hadoop-nodemanager:2.0.0-hadoop3.2.1-java8
     container_name: nodemanager
     env_file:
       - ./hadoop.env
+    networks:
+      - monkey-network      
 
   historyserver:
     image: bde2020/hadoop-historyserver:2.0.0-hadoop3.2.1-java8
@@ -45,6 +53,8 @@ services:
       - ./hadoop.env
     ports:
       - "19888:19888"
+    networks:
+      - monkey-network      
   postgres:
     image: postgres:11
     container_name: hive-postgres
@@ -54,6 +64,8 @@ services:
       POSTGRES_PASSWORD: hive
     volumes:
       - hive-postgres-data:/var/lib/postgresql/data
+    networks:
+      - monkey-network      
 
   hive-server:
     image: bde2020/hive:2.3.2-postgresql-metastore
@@ -73,6 +85,8 @@ services:
       - postgres
     ports:
       - "10000:10000"
+    networks:
+      - monkey-network      
 
   hive-metastore:
     image: bde2020/hive:2.3.2-postgresql-metastore
@@ -91,7 +105,9 @@ services:
       - namenode
       - datanode
     ports:
-      - "9083:9083"      
+      - "9083:9083"    
+    networks:
+      - monkey-network        
   spark-notebook:
     image: jupyter/pyspark-notebook:spark-3.5.0
     container_name: spark-notebook
@@ -122,6 +138,8 @@ services:
       - ./spark-defaults.conf:/usr/local/spark/conf/spark-defaults.conf
       - ./bronze_layer:/home/jovyan/work/bronze_layer
     user: root
+    networks:
+      - monkey-network    
   analytics-clickhouse:
     image: clickhouse/clickhouse-server:24.8
     container_name: analytics-clickhouse
@@ -142,6 +160,8 @@ services:
       timeout: 5s
       retries: 5
       # start_period: 30s
+    networks:
+      - monkey-network      
 
   trino:
     image: trinodb/trino:451
@@ -154,6 +174,39 @@ services:
     depends_on:
       - hive-metastore
       - namenode
+    networks:
+      - monkey-network
+
+  airflow:
+    image: apache/airflow:2.9.0-python3.10
+    container_name: airflow
+    depends_on:
+      - spark-notebook
+    environment:
+      AIRFLOW__CORE__EXECUTOR: SequentialExecutor
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: sqlite:////opt/airflow/airflow.db
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - "8081:8080"
+    command: >
+      bash -c "
+      airflow db init &&
+      airflow users create
+        --username admin
+        --password admin
+        --firstname Admin
+        --lastname User
+        --role Admin
+        --email admin@example.com &&
+      airflow webserver & airflow scheduler
+      "
+    networks:
+      - monkey-network
+
+  
 
     
 
@@ -163,3 +216,7 @@ volumes:
   datanode-data:
   hive-postgres-data:
   clickhouse-data:
+
+networks:
+  monkey-network:
+    driver: bridge
