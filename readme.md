@@ -163,11 +163,11 @@ Continue reading below if first-time or new to Power BI:
 
 10) As of 27/12/2025, snapshot of Power BI design, feel free to pitch your ideas.
 
-![alt text](image.png)
+![alt text](readme_images/image-13.png)
 
-![alt text](image-1.png)
+![alt text](readme_images/image-14.png)
 
-![alt text](image-2.png)
+![alt text](readme_images/image-15.png)
 
 # Progress Update (Skeletal Framework)
 
