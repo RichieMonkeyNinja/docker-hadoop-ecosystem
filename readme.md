@@ -12,7 +12,9 @@
 This project will use the Medallion architecture:
 1) Bronze Layer - to ingest and keep raw data
 2) Silver Layer - to clean and deduplicate bronze data
-3) Gold Layer - to join//add colummns to cleaned silver data
+3) Gold Layer - to join//add colummns to cleaned silver data following a star schema.
+
+![data architecture](readme_images/data_architecture.png)
 
 Refer to individual \<stage>.md inside tutorial_md to follow step-by-step on executing the project.
 
