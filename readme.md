@@ -7,7 +7,12 @@
 5) Please please notify me any encountered issues.
 6) Please create a new branch for any new features, please don't commit directly on the main branch, submit a merge request and notify Richie Teoh or Elmer Lee to validate the branch and approve the merge request.
 
+# Set-up
+
+1. After git clone this repo, please go to .env and paste your bronze_layer folder path into the raw_file_path
+
 # Project Overview
+
 
 This project will use the Medallion architecture:
 1) Bronze Layer - to ingest and keep raw data
