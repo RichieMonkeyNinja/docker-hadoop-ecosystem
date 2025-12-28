@@ -200,6 +200,8 @@ services:
       "
     networks:
       - monkey-network
+    env_file:
+      - .env  
 
   
               
