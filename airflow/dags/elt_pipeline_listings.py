@@ -3,6 +3,9 @@ from airflow.operators.bash import BashOperator
 from airflow.providers.docker.operators.docker import DockerOperator
 from docker.types import Mount
 from datetime import datetime
+import os
+
+
 
 with DAG(
     dag_id="airbnb_medallion_ELT",
@@ -20,7 +23,7 @@ with DAG(
 
         mounts=[
             Mount(
-                source="C:/Users/teohr/Downloads/UM/Big Data Management/group-asgmt/docker-test/bronze_layer",
+                source=os.environ['raw_file_path'],
                 target="/bronze_layer",
                 type="bind",
             )
@@ -71,6 +74,8 @@ with DAG(
         task_id="run_gold_dim_listings",
         bash_command="""
         docker exec spark-notebook spark-submit --master local[*] /home/jovyan/work/gold/dim_listings.py
+
+
         """
     )
 
