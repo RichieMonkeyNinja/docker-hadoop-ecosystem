@@ -1,0 +1,220 @@
+version: "3"
+
+services:
+  namenode:
+    image: bde2020/hadoop-namenode:2.0.0-hadoop3.2.1-java8
+    container_name: namenode
+    environment:
+      - CLUSTER_NAME=test
+    env_file:
+      - ./hadoop.env
+    ports:
+      - "9870:9870"
+      - "9000:9000"
+    volumes:
+      - namenode-data:/hadoop/dfs/name
+      - ./data:/data
+    networks:
+      - monkey-network
+
+  datanode:
+    image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
+    container_name: datanode
+    env_file:
+      - ./hadoop.env
+    ports:
+      - "9864:9864"
+    volumes:
+      - datanode-data:/hadoop/dfs/data
+    networks:
+      - monkey-network
+
+  resourcemanager:
+    image: bde2020/hadoop-resourcemanager:2.0.0-hadoop3.2.1-java8
+    container_name: resourcemanager
+    env_file:
+      - ./hadoop.env
+    ports:
+      - "8088:8088"
+    networks:
+      - monkey-network
+
+  nodemanager:
+    image: bde2020/hadoop-nodemanager:2.0.0-hadoop3.2.1-java8
+    container_name: nodemanager
+    env_file:
+      - ./hadoop.env
+    networks:
+      - monkey-network
+
+  historyserver:
+    image: bde2020/hadoop-historyserver:2.0.0-hadoop3.2.1-java8
+    container_name: historyserver
+    env_file:
+      - ./hadoop.env
+    ports:
+      - "19888:19888"
+    networks:
+      - monkey-network
+  postgres:
+    image: postgres:11
+    container_name: hive-postgres
+    environment:
+      POSTGRES_DB: metastore
+      POSTGRES_USER: hive
+      POSTGRES_PASSWORD: hive
+    volumes:
+      - hive-postgres-data:/var/lib/postgresql/data
+    networks:
+      - monkey-network
+
+  hive-server:
+    image: bde2020/hive:2.3.2-postgresql-metastore
+    container_name: hive-server
+    env_file:
+      - ./hadoop.env
+    environment:
+      HIVE_CORE_CONF_javax_jdo_option_ConnectionURL: jdbc:postgresql://hive-postgres:5432/metastore
+      HIVE_CORE_CONF_javax_jdo_option_ConnectionDriverName: org.postgresql.Driver
+      HIVE_CORE_CONF_javax_jdo_option_ConnectionUserName: hive
+      HIVE_CORE_CONF_javax_jdo_option_ConnectionPassword: hive
+      HIVE_SITE_CONF_hive_metastore_uris: thrift://hive-metastore:9083
+      HIVE_SITE_CONF_hive_metastore_warehouse_dir: /user/hive/warehouse
+    depends_on:
+      - namenode
+      - datanode
+      - postgres
+    ports:
+      - "10000:10000"
+    networks:
+      - monkey-network
+
+  hive-metastore:
+    image: bde2020/hive:2.3.2-postgresql-metastore
+    container_name: hive-metastore
+    env_file:
+      - ./hadoop.env
+    environment:
+      HIVE_CORE_CONF_javax_jdo_option_ConnectionURL: jdbc:postgresql://hive-postgres:5432/metastore
+      HIVE_CORE_CONF_javax_jdo_option_ConnectionDriverName: org.postgresql.Driver
+      HIVE_CORE_CONF_javax_jdo_option_ConnectionUserName: hive
+      HIVE_CORE_CONF_javax_jdo_option_ConnectionPassword: hive
+      HIVE_SITE_CONF_hive_metastore_warehouse_dir: /user/hive/warehouse
+
+    volumes:
+      - ./init-metastore.sh:/init-metastore.sh
+
+    command: ["/bin/bash", "/init-metastore.sh"]
+    depends_on:
+      - postgres
+      - namenode
+      - datanode
+    ports:
+      - "9083:9083"
+    networks:
+      - monkey-network
+  spark-notebook:
+    image: jupyter/pyspark-notebook:spark-3.5.0
+    container_name: spark-notebook
+    depends_on:
+      - namenode
+      - datanode
+      - hive-metastore
+    ports:
+      - "8888:8888"
+      - "4040:4040"
+      - "4045:4045"
+    environment:
+      - HADOOP_USER_NAME=root
+      - HADOOP_CONF_DIR=/opt/hadoop-3.2.1/etc/hadoop
+      - SPARK_DRIVER_HOST=spark-notebook
+      - SPARK_DRIVER_BIND_ADDRESS=0.0.0.0
+      - SPARK_DRIVER_EXTRA_CLASSPATH=/opt/jdbc-jars/clickhouse-jdbc-0.9.5-all.jar
+      - SPARK_EXECUTOR_EXTRA_CLASSPATH=/opt/jdbc-jars/clickhouse-jdbc-0.9.5-all.jar
+      - SPARK_DRIVER_MEMORY=1g
+      - SPARK_EXECUTOR_MEMORY=1g
+      - SPARK_BLOCKMANAGER_PORT=4045
+      - CHOWN_HOME=yes
+    volumes:
+      - ./notebooks:/home/jovyan/work
+      - ./hadoop-conf:/opt/hadoop-3.2.1/etc/hadoop
+      - ./hadoop-conf/hive-site.xml:/opt/spark/conf/hive-site.xml
+      - ./spark-jars:/opt/jdbc-jars
+      - ./spark-defaults.conf:/usr/local/spark/conf/spark-defaults.conf
+      - ./bronze_layer:/home/jovyan/work/bronze_layer
+    user: root
+    networks:
+      - monkey-network
+  analytics-clickhouse:
+    image: clickhouse/clickhouse-server:24.8
+    container_name: analytics-clickhouse
+    ports:
+      - "8123:8123" # expose to Power BI
+      - "9001:9000"
+    ulimits:
+      nofile:
+        soft: 262144
+        hard: 262144
+    volumes:
+      - clickhouse-data:/var/lib/clickhouse
+      - ./clickhouse-config/users.xml:/etc/clickhouse-server/users.d/users.xml
+      - ./scripts/setup.sql:/docker-entrypoint-initdb.d/setup.sql
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "localhost:8123/ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      # start_period: 30s
+    networks:
+      - monkey-network
+
+  trino:
+    image: trinodb/trino:451
+    container_name: trino
+    ports:
+      - "8080:8080"
+    volumes:
+      # We need to give Trino the configuration for your Hive catalog
+      - ./trino-conf:/etc/trino/catalog
+      - ./hadoop-conf:/etc/hadoop/conf
+    depends_on:
+      - hive-metastore
+      - namenode
+    networks:
+      - monkey-network
+
+  airflow:
+    image: apache/airflow:2.9.0-python3.10
+    container_name: airflow
+    depends_on:
+      - spark-notebook
+    environment:
+      AIRFLOW__CORE__EXECUTOR: SequentialExecutor
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: sqlite:////opt/airflow/airflow.db
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - "8081:8080"
+    command: >
+      bash -c "
+      airflow db init &&
+      airflow users create --username admin --password admin --firstname Admin --lastname User --role Admin --email admin@example.com || true &&
+      airflow webserver -p 8080 & 
+      airflow scheduler
+      "
+    networks:
+      - monkey-network
+    env_file:
+      - .env
+
+volumes:
+  namenode-data:
+  datanode-data:
+  hive-postgres-data:
+  clickhouse-data:
+
+networks:
+  monkey-network:
+    driver: bridge
