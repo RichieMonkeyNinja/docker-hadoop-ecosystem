@@ -1,0 +1,23 @@
+<clickhouse>
+    <users>
+        <analytics>
+            <password>analytics</password>
+            <access_management>1</access_management>
+            <networks>
+                <ip>::/0</ip>
+            </networks>
+            <profile>default</profile>
+            <quota>default</quota>
+        </analytics>
+
+        <spark_admin>
+            <password>spark_123</password>
+            <access_management>1</access_management>
+            <networks>
+                <ip>::/0</ip>
+            </networks>
+            <profile>default</profile>
+            <quota>default</quota>
+        </spark_admin>
+    </users>
+</clickhouse>
